@@ -53,8 +53,8 @@ package body BCH_Codes is
    end GF_Inverse;
 
    function Encode (Msg : Message_Type) return Codeword_Type is
-      Temp : array (1 .. N) := (others => 0);
-      CW   : Codeword_Type := (others => 0);
+      Temp : Codeword_Type := [others => 0];
+      CW   : Codeword_Type := [others => 0];
    begin
       for I in 1 .. K loop
          Temp (I) := Msg (I);
@@ -91,7 +91,7 @@ package body BCH_Codes is
    end Is_Valid_Codeword;
 
    function Compute_Syndromes (CW : Codeword_Type) return Syndrome_Array is
-      Syms : Syndrome_Array := (others => 0);
+      Syms : Syndrome_Array := [others => 0];
    begin
       for I in 1 .. 2 * T loop
          declare
@@ -137,40 +137,36 @@ package body BCH_Codes is
          end;
       end if;
 
-      declare
-         Best_CW : Codeword_Type := Received;
-      begin
-         if Is_Valid_Codeword (Received) then
-            return Received;
-         end if;
-         
-         for I in Codeword_Type'Range loop
+      if Is_Valid_Codeword (Received) then
+         return Received;
+      end if;
+      
+      for I in Codeword_Type'Range loop
+         declare
+            Test_CW : Codeword_Type := Received;
+         begin
+            Test_CW (I) := Test_CW (I) xor 1;
+            if Is_Valid_Codeword (Test_CW) then
+               return Test_CW;
+            end if;
+         end;
+      end loop;
+
+      for I in 1 .. N - 1 loop
+         for J in I + 1 .. N loop
             declare
                Test_CW : Codeword_Type := Received;
             begin
                Test_CW (I) := Test_CW (I) xor 1;
+               Test_CW (J) := Test_CW (J) xor 1;
                if Is_Valid_Codeword (Test_CW) then
                   return Test_CW;
                end if;
             end;
          end loop;
+      end loop;
 
-         for I in 1 .. N - 1 loop
-            for J in I + 1 .. N loop
-               declare
-                  Test_CW : Codeword_Type := Received;
-               begin
-                  Test_CW (I) := Test_CW (I) xor 1;
-                  Test_CW (J) := Test_CW (J) xor 1;
-                  if Is_Valid_Codeword (Test_CW) then
-                     return Test_CW;
-                  end if;
-               end;
-            end loop;
-         end loop;
-
-         raise Decoding_Failed_Error;
-      end;
+      raise Decoding_Failed_Error;
    end Decode;
 
 end BCH_Codes;
