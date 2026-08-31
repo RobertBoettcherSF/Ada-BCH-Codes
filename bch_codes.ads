@@ -11,7 +11,7 @@ package BCH_Codes is
    K : constant := 7;
    T : constant := 2;
 
-   type Bit is range 0 .. 1;
+   type Bit is mod 2;
    type Message_Type is array (1 .. K) of Bit;
    type Codeword_Type is array (1 .. N) of Bit;
    
