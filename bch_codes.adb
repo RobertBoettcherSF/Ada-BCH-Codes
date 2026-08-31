@@ -3,14 +3,14 @@ package body BCH_Codes is
    -- GF(2^4) addition is bitwise XOR
    function GF_Add (A, B : GF_Element) return GF_Element is
    begin
-      return GF_Element (Integer (A) xor Integer (B));
+      return A xor B;
    end GF_Add;
 
    -- GF(2^4) multiplication modulo x^4 + x + 1 (primitive polynomial, element 2 is alpha)
    function GF_Mul (A, B : GF_Element) return GF_Element is
-      Res : Integer := 0;
-      Temp_A : Integer := Integer (A);
-      Temp_B : Integer := Integer (B);
+      Res : GF_Element := 0;
+      Temp_A : GF_Element := A;
+      Temp_B : GF_Element := B;
    begin
       for I in 0 .. 3 loop
          if (Temp_B and 1) /= 0 then
@@ -18,7 +18,7 @@ package body BCH_Codes is
          end if;
          Temp_B := Temp_B / 2;
          declare
-            High_Bit : constant Integer := Temp_A and 8;
+            High_Bit : constant GF_Element := Temp_A and 8;
          begin
             Temp_A := (Temp_A * 2) and 15;
             if High_Bit /= 0 then
@@ -26,7 +26,7 @@ package body BCH_Codes is
             end if;
          end;
       end loop;
-      return GF_Element (Res);
+      return Res;
    end GF_Mul;
 
    function GF_Power (A : GF_Element; Power : Natural) return GF_Element is
