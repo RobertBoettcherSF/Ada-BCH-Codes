@@ -21,29 +21,29 @@ begin
    -- TEST 1 — Basic Encoding and Validity
    Put_Line ("TEST 1 — Basic Encoding and Validity");
    declare
-      Msg : constant Message_Type := (1, 0, 1, 1, 0, 1, 0);
+      Msg : constant Message_Type := [1, 0, 1, 1, 0, 1, 0];
       CW : constant Codeword_Type := Encode (Msg);
    begin
       Check ("1.1 Codeword length is N", CW'Length = N);
-      Check ("1.2 Encoded message matches source message prefix", CW (1 .. K) = Msg);
+      Check ("1.2 Encoded message matches source message prefix", (for all I in Msg'Range => CW (I) = Msg (I)));
       Check ("1.3 Encoded codeword is recognized as valid", Is_Valid_Codeword (CW));
    end;
 
    -- TEST 2 — Alternative Message Encoding
    Put_Line ("TEST 2 — Alternative Message Encoding");
    declare
-      Msg : constant Message_Type := (0, 1, 1, 0, 1, 0, 1);
+      Msg : constant Message_Type := [0, 1, 1, 0, 1, 0, 1];
       CW : constant Codeword_Type := Encode (Msg);
    begin
       Check ("2.1 Codeword length is correct", CW'Length = N);
-      Check ("2.2 Message part preserved", CW (1 .. K) = Msg);
+      Check ("2.2 Message part preserved", (for all I in Msg'Range => CW (I) = Msg (I)));
       Check ("2.3 Codeword validity check passes", Is_Valid_Codeword (CW));
    end;
 
    -- TEST 3 — All-Zero Message
    Put_Line ("TEST 3 — All-Zero Message");
    declare
-      Msg : constant Message_Type := (others => 0);
+      Msg : constant Message_Type := [others => 0];
       CW : constant Codeword_Type := Encode (Msg);
    begin
       Check ("3.1 All-zero message encodes successfully", CW'Length = N);
@@ -54,7 +54,7 @@ begin
    -- TEST 4 — All-One Message
    Put_Line ("TEST 4 — All-One Message");
    declare
-      Msg : constant Message_Type := (others => 1);
+      Msg : constant Message_Type := [others => 1];
       CW : constant Codeword_Type := Encode (Msg);
    begin
       Check ("4.1 All-one message encodes successfully", CW'Length = N);
@@ -65,7 +65,7 @@ begin
    -- TEST 5 — Syndrome Computation on Valid Codeword
    Put_Line ("TEST 5 — Syndrome Computation on Valid Codeword");
    declare
-      Msg : constant Message_Type := (1, 1, 0, 0, 1, 1, 0);
+      Msg : constant Message_Type := [1, 1, 0, 0, 1, 1, 0];
       CW : constant Codeword_Type := Encode (Msg);
       Syms : constant Syndrome_Array := Compute_Syndromes (CW);
    begin
@@ -77,7 +77,7 @@ begin
    -- TEST 6 — Syndrome Computation on Corrupted Codeword
    Put_Line ("TEST 6 — Syndrome Computation on Corrupted Codeword");
    declare
-      Msg : constant Message_Type := (1, 0, 1, 0, 1, 0, 1);
+      Msg : constant Message_Type := [1, 0, 1, 0, 1, 0, 1];
       CW : constant Codeword_Type := Encode (Msg);
       Corrupted : Codeword_Type := CW;
       Syms : Syndrome_Array;
@@ -92,7 +92,7 @@ begin
    -- TEST 7 — Decoding Zero-Error Codeword
    Put_Line ("TEST 7 — Decoding Zero-Error Codeword");
    declare
-      Msg : constant Message_Type := (0, 0, 1, 1, 1, 0, 0);
+      Msg : constant Message_Type := [0, 0, 1, 1, 1, 0, 0];
       CW : constant Codeword_Type := Encode (Msg);
       Decoded : constant Codeword_Type := Decode (CW);
    begin
@@ -104,7 +104,7 @@ begin
    -- TEST 8 — Decoding Single-Error Codeword
    Put_Line ("TEST 8 — Decoding Single-Error Codeword");
    declare
-      Msg : constant Message_Type := (1, 0, 1, 1, 1, 1, 0);
+      Msg : constant Message_Type := [1, 0, 1, 1, 1, 1, 0];
       CW : constant Codeword_Type := Encode (Msg);
       Corrupted : Codeword_Type := CW;
       Decoded : Codeword_Type;
@@ -119,7 +119,7 @@ begin
    -- TEST 9 — Decoding Double-Error Codeword
    Put_Line ("TEST 9 — Decoding Double-Error Codeword");
    declare
-      Msg : constant Message_Type := (1, 1, 0, 1, 0, 1, 1);
+      Msg : constant Message_Type := [1, 1, 0, 1, 0, 1, 1];
       CW : constant Codeword_Type := Encode (Msg);
       Corrupted : Codeword_Type := CW;
       Decoded : Codeword_Type;
@@ -135,7 +135,7 @@ begin
    -- TEST 10 — Decoding Single-Error at Position 1
    Put_Line ("TEST 10 — Decoding Single-Error at Position 1");
    declare
-      Msg : constant Message_Type := (0, 1, 0, 1, 0, 1, 0);
+      Msg : constant Message_Type := [0, 1, 0, 1, 0, 1, 0];
       CW : constant Codeword_Type := Encode (Msg);
       Corrupted : Codeword_Type := CW;
       Decoded : Codeword_Type;
@@ -150,7 +150,7 @@ begin
    -- TEST 11 — Decoding Double-Error at Edge Positions
    Put_Line ("TEST 11 — Decoding Double-Error at Edge Positions");
    declare
-      Msg : constant Message_Type := (1, 0, 0, 0, 1, 1, 1);
+      Msg : constant Message_Type := [1, 0, 0, 0, 1, 1, 1];
       CW : constant Codeword_Type := Encode (Msg);
       Corrupted : Codeword_Type := CW;
       Decoded : Codeword_Type;
@@ -166,7 +166,7 @@ begin
    -- TEST 12 — Alternating Bit Message
    Put_Line ("TEST 12 — Alternating Bit Message");
    declare
-      Msg : constant Message_Type := (1, 0, 1, 0, 1, 0, 1);
+      Msg : constant Message_Type := [1, 0, 1, 0, 1, 0, 1];
       CW : constant Codeword_Type := Encode (Msg);
       Decoded : constant Codeword_Type := Decode (CW);
    begin
@@ -178,7 +178,7 @@ begin
    -- TEST 13 — Uncorrectable Error Handling
    Put_Line ("TEST 13 — Uncorrectable Error Handling");
    declare
-      Msg : constant Message_Type := (1, 1, 1, 0, 0, 0, 1);
+      Msg : constant Message_Type := [1, 1, 1, 0, 0, 0, 1];
       CW : constant Codeword_Type := Encode (Msg);
       Corrupted : Codeword_Type := CW;
       Exception_Raised : Boolean := False;
@@ -188,7 +188,8 @@ begin
       Corrupted (10) := Corrupted (10) xor 1;
       begin
          declare
-            Dummy : Codeword_Type := Decode (Corrupted);
+            Dummy : constant Codeword_Type := Decode (Corrupted);
+            pragma Unreferenced (Dummy);
          begin
             null;
          end;
