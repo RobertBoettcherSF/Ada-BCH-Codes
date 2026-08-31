@@ -16,7 +16,7 @@ package BCH_Codes is
    type Codeword_Type is array (1 .. N) of Bit;
    
    -- Elements of GF(2^4) represented as integers 0 .. 15
-   type GF_Element is range 0 .. 15;
+   type GF_Element is mod 16;
    type Syndrome_Array is array (1 .. 2 * T) of GF_Element;
 
    -- Exceptions
@@ -29,8 +29,7 @@ package BCH_Codes is
 
    function Is_Valid_Codeword (CW : Codeword_Type) return Boolean;
 
-   function Compute_Syndromes (CW : Codeword_Type) return Syndrome_Array
-     with Post => Compute_Syndromes'Result'Length = 2 * T;
+   function Compute_Syndromes (CW : Codeword_Type) return Syndrome_Array;
 
    function Decode (Received : Codeword_Type) return Codeword_Type
      with Post => Is_Valid_Codeword (Decode'Result);
