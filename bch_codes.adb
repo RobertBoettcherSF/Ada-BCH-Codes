@@ -44,14 +44,6 @@ package body BCH_Codes is
       return Res;
    end GF_Power;
 
-   function GF_Inverse (A : GF_Element) return GF_Element is
-   begin
-      if A = 0 then
-         return 0;
-      end if;
-      return GF_Power (A, 14);
-   end GF_Inverse;
-
    function Encode (Msg : Message_Type) return Codeword_Type is
       Temp : Codeword_Type := [others => 0];
       CW   : Codeword_Type := [others => 0];
@@ -110,37 +102,12 @@ package body BCH_Codes is
    end Compute_Syndromes;
 
    function Decode (Received : Codeword_Type) return Codeword_Type is
-      Syms : constant Syndrome_Array := Compute_Syndromes (Received);
-      S1 : constant GF_Element := Syms (1);
-      S2 : constant GF_Element := Syms (2);
-      S3 : constant GF_Element := Syms (3);
-      S4 : constant GF_Element := Syms (4);
    begin
-      if S1 = 0 and S2 = 0 and S3 = 0 and S4 = 0 then
-         return Received;
-      end if;
-
-      if S2 = GF_Mul (S1, S1) and S1 /= 0 then
-         declare
-            X1_Inv : constant GF_Element := GF_Inverse (S1);
-         begin
-            for J in Codeword_Type'Range loop
-               if GF_Power (2, N - J) = X1_Inv then
-                  declare
-                     Corrected : Codeword_Type := Received;
-                  begin
-                     Corrected (J) := Corrected (J) xor 1;
-                     return Corrected;
-                  end;
-               end if;
-            end loop;
-         end;
-      end if;
-
       if Is_Valid_Codeword (Received) then
          return Received;
       end if;
       
+      -- Attempt single-error correction (brute-force Bounded Distance Decoding)
       for I in Codeword_Type'Range loop
          declare
             Test_CW : Codeword_Type := Received;
@@ -152,6 +119,7 @@ package body BCH_Codes is
          end;
       end loop;
 
+      -- Attempt double-error correction
       for I in 1 .. N - 1 loop
          for J in I + 1 .. N loop
             declare
@@ -166,6 +134,7 @@ package body BCH_Codes is
          end loop;
       end loop;
 
+      -- No valid codeword found within distance t=2
       raise Decoding_Failed_Error;
    end Decode;
 
